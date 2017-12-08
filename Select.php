@@ -29,13 +29,51 @@ use yii\widgets\InputWidget;
  */
 class Select extends InputWidget{
     
+    /**
+     * 样式
+     * @var string
+     */
     public $_class = 'form-control';
-    public $_items = [];           //选项数据
-    public $_selection = null;     //默认选中
-    public $_language  = 'zh-CN';  //语言
-    public $_multiple  = false;    //是否多选
-    public $_placeholder = null;   //占位符
-    public $_options   = [];       //原生配置项
+    /**
+     * 选项数据
+     * @var array
+     */
+    public $_items = [];
+    /**
+     * 默认选中
+     * @var unknown
+     */
+    public $_selection = null;
+    /**
+     * 语言，默认中文
+     * @var string
+     */
+    public $_language  = 'zh-CN';
+    /**
+     * 是否多选
+     * @var string
+     */
+    public $_multiple  = false;
+    /**
+     * 占位符
+     * @var unknown
+     */
+    public $_placeholder = null;
+    /**
+     * 是否允许清楚当前选中项
+     * @var string
+     */
+    public $_clear = false;
+    /**
+     * 原生配置项
+     * @var array
+     */
+    public $_options   = [];
+    /**
+     * 当前配置和原生配置合并
+     * @var boolean
+     */
+    public $_optionsMerge = true;
     
     public function run(){
         parent::run();
@@ -66,26 +104,26 @@ class Select extends InputWidget{
         
         SelectAsset::register($view);
         
-        $min = $max = '';
+        $options = [
+            'language' => $this->_language,
+            'placeholder' => $this->_placeholder,
+            'allowClear' => $this->_clear,
+        ];
+        
         if(!empty($this->_options)){
-            $options = $this->getJsonOptions($this->_options);
-            $js =   "$(function(){ 
-                $('#{$this->options['id']}').select2({$options}); 
-            })";
-        }else{
-            $js =   "$(function(){
-                $('#{$this->options['id']}').select2({
-                    language:'{$this->_language}',
-                    placeholder:'{$this->_placeholder}',
-                    allowClear:true,
-                });
-            })";
+            $options = $this->_optionsMerge === true ? array_merge($options, $this->_options) : $this->_options;
         }
+        
+        $js = <<<JS
+            $(function(){
+                $('#{$this->options['id']}').select2({$this->jsonEncode($options)});
+        	});
+JS;
         
         $view->registerJs($js, $view::POS_END);
     }
     
-    private function getJsonOptions($array){
+    private function jsonEncode($array){
         return Json::encode($array);
     }
     
